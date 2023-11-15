@@ -1,0 +1,121 @@
+import tkinter as tk
+from tkinter import messagebox
+
+class TicketBookingApp:
+    def _init_(self, root):
+        self.root = root
+        self.root.title("Flight Ticket Booking System")
+        self.root.geometry("600x600")  # Set the window size
+        self.queue = []
+        self.max_seats = 10
+
+        self.name_label = tk.Label(root, text="Name:")
+        self.name_label.pack()
+        self.name_entry = tk.Entry(root)
+        self.name_entry.pack()
+
+        self.age_label = tk.Label(root, text="Age:")
+        self.age_label.pack()
+        self.age_entry = tk.Entry(root)
+        self.age_entry.pack()
+
+        self.mobile_label = tk.Label(root, text="Mobile Number:")
+        self.mobile_label.pack()
+        self.mobile_entry = tk.Entry(root)
+        self.mobile_entry.pack()
+
+        self.source_label = tk.Label(root, text="Source:")
+        self.source_label.pack()
+        self.source_entry = tk.Entry(root)
+        self.source_entry.pack()
+
+        self.destination_label = tk.Label(root, text="Destination:")
+        self.destination_label.pack()
+        self.destination_entry = tk.Entry(root)
+        self.destination_entry.pack()
+
+        self.priority_label = tk.Label(root, text="CATEGORY:")
+        self.priority_label.pack()
+
+        self.priority_var = tk.StringVar()
+        self.priority_var.set("General")
+        self.priority_menu = tk.OptionMenu(root, self.priority_var, "Senior", "Army", "Student", "General")
+        self.priority_menu.pack()
+
+        self.tickets_label = tk.Label(root, text="Number of Tickets:")
+        self.tickets_label.pack()
+
+        self.tickets_var = tk.IntVar()
+        self.tickets_var.set(1)
+        self.tickets_entry = tk.OptionMenu(root, self.tickets_var, 1, 2, 3, 4, 5)
+        self.tickets_entry.pack()
+
+        self.add_button = tk.Button(root, text="Add Customer", command=self.add_customer)
+        self.add_button.pack()
+
+        self.book_button = tk.Button(root, text="Book Ticket", command=self.book_ticket)
+        self.book_button.pack()
+
+        self.message_label = tk.Label(root, text="")
+        self.message_label.pack()
+
+        self.seats_label = tk.Label(root, text="Seats left: 10", fg="red")
+        self.seats_label.pack()
+
+    def add_customer(self):
+        name = self.name_entry.get()
+        age = self.age_entry.get()
+        mobile = self.mobile_entry.get()
+        source = self.source_entry.get()
+        destination = self.destination_entry.get()
+        priority = self.priority_var.get()
+        num_tickets = self.tickets_var.get()
+
+        if name and age and mobile and source and destination and num_tickets > 0:
+            if len(self.queue) + num_tickets > self.max_seats:
+                self.message_label.config(text="Not enough seats available.")
+            else:
+                if priority == "Senior":
+                    priority_value = "Lower seat"
+                elif priority == "Army":
+                    priority_value = "Middle seat"
+                elif priority == "Student":
+                    priority_value = "Top seat"
+                else:
+                    priority_value = "Top seat"
+
+                for _ in range(num_tickets):
+                    customer = {
+                        'name': name,
+                        'age': age,
+                        'mobile': mobile,
+                        'source': source,
+                        'destination': destination,
+                        'priority': priority_value
+                    }
+                    self.queue.append(customer)
+                self.message_label.config(text=f"{num_tickets} ticket(s) for {name} added to the queue.")
+                self.update_seats_label()
+        else:
+            self.message_label.config(text="Please fill in all fields and select the number of tickets.")
+
+    def book_ticket(self):
+        if not self.queue:
+            self.message_label.config(text="No customers in the queue.")
+        else:
+            # Sort the queue based on priority (lower value means higher priority)
+            self.queue.sort(key=lambda x: x['priority'])
+            if len(self.queue) > self.max_seats:
+                self.queue = self.queue[:self.max_seats]  # Truncate the queue to the maximum limit
+            booked_customers = [f"Name: {customer['name']}, Age: {customer['age']}, Source: {customer['source']}, Destination: {customer['destination']}, Priority: {customer['priority']}" for customer in self.queue]
+            self.message_label.config(text="Booked Tickets:\n" + "\n\n".join(booked_customers))
+            self.update_seats_label()
+
+    def update_seats_label(self):
+        seats_left = self.max_seats - len(self.queue)
+        self.seats_label.config(text=f"Seats left: {seats_left}", fg="red")
+
+if _name_ == '_main_':
+    root = tk.Tk()
+    app = TicketBookingApp(root)
+    root.mainloop()
